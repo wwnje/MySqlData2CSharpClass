@@ -10,7 +10,7 @@ var connection = mysql.createConnection({
 	host		: '127.0.0.1',
 	user		: 'root',
 	password	: '',
-	database	: 'pirate'
+	database	: 'test'
 });
 connection.connect();
 
@@ -69,24 +69,7 @@ function OutputTable(name) {
 	
 	var spaceName = GetSpaceName(name);
 	var readableName = ReadableName(name.substr(2));
-	
-	var priName = "";
-
-	var sqlFindPri = 
-	'select COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS where table_name ='
-		+ '\'' + name + '\'' +'AND COLUMN_KEY=\'PRI\'';
-
-	connection.query(sqlFindPri,function (err, result) {
-			if(err){
-			  console.log('[SELECT ERROR] - ',err.message);
-			  return;
-			}
-			
-			for (var p in result) {
-				priName = result[p].COLUMN_NAME;
-            }  
-	});
-
+		
 	connection.query('SHOW FULL COLUMNS FROM ' + name, function (err, rows, fields) {
 		if (err) {throw err;};
 
@@ -100,12 +83,14 @@ function OutputTable(name) {
 
 			var stringfield = {}
 
+			var priKeyName = "";
+			var autoAdd = false;
+			var headClass = "";
 			var contentClass = "";
-			contentClass += "namespace Game.Entity" + spaceName + os.EOL + "{" + os.EOL;
-			contentClass += "	[TableName(\"" + name + "\")]" + os.EOL;
-			contentClass += "	[PrimaryKey(\"" +  priName + "\", AutoIncrement = false)]" + os.EOL;
+
 			contentClass += "	public class " + readableName + os.EOL;
 			contentClass += "	{" + os.EOL;
+
 			for (var i = 0; i < fields.length; i++) {
 				var field = fields[i];
 				stringfield[field.name] = false;
@@ -113,7 +98,16 @@ function OutputTable(name) {
 				contentClass += "		public ";
 
 				var unsighed = (field.flags & mysql.FieldFlag.UNSIGNED_FLAG) == 0 ? "" : "u";
-				
+
+				if((field.flags & mysql.FieldFlag.PRI_KEY_FLAG ) != 0)
+				{
+					priKeyName = field.name;
+					if((field.flags & mysql.FieldFlag.AUTO_INCREMENT_FLAG ) != 0)
+					{
+						autoAdd = true;
+					}
+				}
+
 				if (fields[i].type == mysql.Types.TINY) {
 					contentClass += 'char ';
 				}
@@ -140,9 +134,14 @@ function OutputTable(name) {
 			contentClass += "	}" + os.EOL;
 			contentClass += "}" + os.EOL;
 
+			headClass += "namespace Game.Entity." + spaceName + os.EOL + "{" + os.EOL;
+			headClass += "	[TableName(\"" + name + "\")]" + os.EOL;
+			headClass += "	[PrimaryKey(\"" +  priKeyName + "\", AutoIncrement = " + autoAdd + ")]" + os.EOL;
+	
+
 			fs.open(path.join(OUTPUT_PATH, readableName + ".cs"), 'w+', function (ferr, fd) {
 				if (ferr) {throw ferr;};
-				fs.write(fd, contentClass);
+				fs.write(fd, headClass + contentClass);
 				TaskFinish();
 			})
 		});

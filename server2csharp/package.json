@@ -1,0 +1,24 @@
+{
+  "name": "server2csharp",
+  "version": "1.0.0",
+  "description": "a sample mysql data 2 csharp class",
+  "main": "main.js",
+  "dependencies": {
+    "mysql": "^2.9.0",
+    "rimraf": "^2.4.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wwnje/MySqlData2CSharpClass.git"
+  },
+  "author": "wwnje",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wwnje/MySqlData2CSharpClass/issues"
+  },
+  "homepage": "https://github.com/wwnje/MySqlData2CSharpClass#readme"
+}
