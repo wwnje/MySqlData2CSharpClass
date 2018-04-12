@@ -10,7 +10,7 @@ var connection = mysql.createConnection({
 	host		: '127.0.0.1',
 	user		: 'root',
 	password	: '',
-	database	: 'test'
+	database	: 'dhd3'
 });
 connection.connect();
 
@@ -102,10 +102,7 @@ function OutputTable(name) {
 				if((field.flags & mysql.FieldFlag.PRI_KEY_FLAG ) != 0)
 				{
 					priKeyName = field.name;
-					if((field.flags & mysql.FieldFlag.AUTO_INCREMENT_FLAG ) != 0)
-					{
-						autoAdd = true;
-					}
+					autoAdd = (field.flags & mysql.FieldFlag.AUTO_INCREMENT_FLAG ) != 0;
 				}
 
 				if (fields[i].type == mysql.Types.TINY) {
@@ -134,6 +131,7 @@ function OutputTable(name) {
 			contentClass += "	}" + os.EOL;
 			contentClass += "}" + os.EOL;
 
+			headClass += "using PetaPoco;" + os.EOL + os.EOL;
 			headClass += "namespace Game.Entity." + spaceName + os.EOL + "{" + os.EOL;
 			headClass += "	[TableName(\"" + name + "\")]" + os.EOL;
 			headClass += "	[PrimaryKey(\"" +  priKeyName + "\", AutoIncrement = " + autoAdd + ")]" + os.EOL;
