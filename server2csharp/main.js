@@ -4,7 +4,9 @@ var path = require('path');
 var rimraf = require('rimraf');
 var os = require('os');
 
-var OUTPUT_PATH = path.join(process.cwd(), 'output');
+var OUTPUT_PATH_USER = path.join(process.cwd(), 'output/user');
+var OUTPUT_PATH_WORLD = path.join(process.cwd(), 'output/world');
+var OUTPUT_PATH_CONFIG = path.join(process.cwd(), 'output/config');
 
 var connection = mysql.createConnection({
 	host		: '127.0.0.1',
@@ -51,24 +53,38 @@ function ReadableName(name)
 	return newname;
 }
 
-function GetSpaceName(name)
+function GetSpaceNameAndPath(name)
 {
+	var names = new Array();
 	var spaceName = "";
+	var path = "";
+
 	if (0 == name.indexOf('c_')) {
 		spaceName = "Config";
+		path = OUTPUT_PATH_CONFIG;
 	}else if (0 == name.indexOf('w_')) {
 		spaceName = "World";
+		path = OUTPUT_PATH_WORLD;
 	}else if (0 == name.indexOf('u_')) {
 		spaceName = "User";
+		path = OUTPUT_PATH_USER;
 	}
-	return spaceName;
+
+	names.push(spaceName);
+	names.push(path);
+	return names;
 }
 
 function OutputTable(name) {
 	task++;
 	
-	var spaceName = GetSpaceName(name);
+	console.log("OutputTable Start:"+ name);
+
+	var names = GetSpaceNameAndPath(name);
+
 	var readableName = ReadableName(name.substr(2));
+	var spaceName = names[0];
+	var outputPath = names[1];
 		
 	connection.query('SHOW FULL COLUMNS FROM ' + name, function (err, rows, fields) {
 		if (err) {throw err;};
@@ -135,11 +151,15 @@ function OutputTable(name) {
 			headClass += "namespace Game.Entity." + spaceName + os.EOL + "{" + os.EOL;
 			headClass += "	[TableName(\"" + name + "\")]" + os.EOL;
 			headClass += "	[PrimaryKey(\"" +  priKeyName + "\", AutoIncrement = " + autoAdd + ")]" + os.EOL;
-	
 
-			fs.open(path.join(OUTPUT_PATH, readableName + ".cs"), 'w+', function (ferr, fd) {
-				if (ferr) {throw ferr;};
+			fs.open(path.join(outputPath, readableName + ".cs"), 'w+', function (ferr, fd) {
+				if (ferr) 
+				{
+					console.log(ferr);
+					throw ferr;
+				};
 				fs.write(fd, headClass + contentClass);
+				console.log("write:"+ readableName);
 				TaskFinish();
 			})
 		});
@@ -163,6 +183,12 @@ function OnShowTables(err, rows, fields) {
 	 //process.exit();
 }
 
-rimraf.sync(OUTPUT_PATH);
-fs.mkdirSync(OUTPUT_PATH);
+rimraf.sync(OUTPUT_PATH_USER);
+rimraf.sync(OUTPUT_PATH_CONFIG);
+rimraf.sync(OUTPUT_PATH_WORLD);
+
+fs.mkdirSync(OUTPUT_PATH_USER);
+fs.mkdirSync(OUTPUT_PATH_CONFIG);
+fs.mkdirSync(OUTPUT_PATH_WORLD);
+
 connection.query('SHOW TABLES', OnShowTables)
