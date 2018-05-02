@@ -90,10 +90,13 @@ function OutputTable(name) {
 		if (err) {throw err;};
 
 		var comment = {};
+		var comment_def = {};
 		for (var i = 0; i < rows.length; i++) {
 			comment[rows[i].Field] = rows[i].Comment;
+			comment_def[rows[i].Field] = rows[i].Default;
 		};
 		
+
 		connection.query('SELECT * FROM ' + name, function (err, rows, fields) {
 			if (err) {throw err;};
 
@@ -140,8 +143,20 @@ function OutputTable(name) {
 					contentClass += 'string ';
 					stringfield[field.name] = true;
 				}
+				
+				var def = "";
+				if(spaceName !== 'Config')
+				{
+					// console.log(field.name);
+					// console.log(comment_def[field.name]);
 
-				contentClass += field.name + ' { get; set; } // ' + comment[field.name] + os.EOL;
+					def = comment_def[field.name]
+					def = def == "" ? '"' + def + '"' : def;
+					def = def != null ? ' = ' + def + ';' : "";
+				}
+
+				contentClass += field.name + ' { get; set; }' + def;
+				contentClass += '// ' + comment[field.name] + os.EOL;
 			};
 
 			contentClass += "	}" + os.EOL;
