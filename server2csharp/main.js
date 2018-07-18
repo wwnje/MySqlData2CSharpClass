@@ -4,9 +4,10 @@ var path = require('path');
 var rimraf = require('rimraf');
 var os = require('os');
 
-var OUTPUT_PATH_USER = path.join(process.cwd(), 'output/user');
-var OUTPUT_PATH_WORLD = path.join(process.cwd(), 'output/world');
-var OUTPUT_PATH_CONFIG = path.join(process.cwd(), 'output/config');
+var OUTPUT_PATH = path.join(process.cwd(), 'output');
+var OUTPUT_PATH_USER = path.join(process.cwd(), 'output/User');
+var OUTPUT_PATH_WORLD = path.join(process.cwd(), 'output/World');
+var OUTPUT_PATH_CONFIG = path.join(process.cwd(), 'output/Config');
 
 var connection = mysql.createConnection({
 	host		: '127.0.0.1',
@@ -138,6 +139,10 @@ function OutputTable(name) {
 				}
 				else if (fields[i].type == mysql.Types.FLOAT || fields[i].type == mysql.Types.DOUBLE) {
 					contentClass += 'double ';
+				}
+				else if (fields[i].type == mysql.Types.VAR_STRING || fields[i].type == mysql.Types.STRING || fields[i].type == mysql.Types.BLOB ) {
+					contentClass += 'string ';
+					stringfield[field.name] = true;
 				}
 				else if (fields[i].type == mysql.Types.VAR_STRING || fields[i].type == mysql.Types.STRING) {
 					contentClass += 'string ';
