@@ -203,10 +203,12 @@ function OnShowTables(err, rows, fields) {
 	 //process.exit();
 }
 
+rimraf.sync(OUTPUT_PATH);
 rimraf.sync(OUTPUT_PATH_USER);
 rimraf.sync(OUTPUT_PATH_CONFIG);
 rimraf.sync(OUTPUT_PATH_WORLD);
 
+fs.mkdirSync(OUTPUT_PATH);
 fs.mkdirSync(OUTPUT_PATH_USER);
 fs.mkdirSync(OUTPUT_PATH_CONFIG);
 fs.mkdirSync(OUTPUT_PATH_WORLD);
